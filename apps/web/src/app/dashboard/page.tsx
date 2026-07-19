@@ -320,40 +320,54 @@ export default function Dashboard() {
       maintenanceMode={isDemo}
     >
       {activeTab === 'mission_control' && (
-        <MissionControl
-          t={t}
-          shiftActive={shiftActive}
-          changeTab={changeTab}
-          layoutMode={layoutMode}
-          attTasks={attTasks}
-          mbTasks={mbTasks}
-          toggleAttTask={toggleAttTask}
-          telemetry={telemetry}
-          activeDirective={activeDirective}
-          acknowledgedDirectives={acknowledgedDirectives}
-          acknowledging={acknowledging}
-          handleAcknowledge={handleAcknowledge}
-          selectedLanguage={selectedLanguage}
-          setSelectedLanguage={setSelectedLanguage}
-          selectedZone={selectedZone}
-          setSelectedZone={setSelectedZone}
-          isSimulating={isSimulating}
-          triggerSimulation={triggerSimulation}
-          toggleShiftActive={toggleShiftActive}
-          anomalyThresholdDensity={anomalyThresholdDensity}
-          anomalyThresholdCongestion={anomalyThresholdCongestion}
-          activeModelName={activeModelName}
-        />
+        <div
+          role="tabpanel"
+          id="panel-mission_control"
+          aria-labelledby="tab-mission_control mobile-tab-mission_control"
+          className="flex-grow flex flex-col"
+        >
+          <MissionControl
+            t={t}
+            shiftActive={shiftActive}
+            changeTab={changeTab}
+            layoutMode={layoutMode}
+            attTasks={attTasks}
+            mbTasks={mbTasks}
+            toggleAttTask={toggleAttTask}
+            telemetry={telemetry}
+            activeDirective={activeDirective}
+            acknowledgedDirectives={acknowledgedDirectives}
+            acknowledging={acknowledging}
+            handleAcknowledge={handleAcknowledge}
+            selectedLanguage={selectedLanguage}
+            setSelectedLanguage={setSelectedLanguage}
+            selectedZone={selectedZone}
+            setSelectedZone={setSelectedZone}
+            isSimulating={isSimulating}
+            triggerSimulation={triggerSimulation}
+            toggleShiftActive={toggleShiftActive}
+            anomalyThresholdDensity={anomalyThresholdDensity}
+            anomalyThresholdCongestion={anomalyThresholdCongestion}
+            activeModelName={activeModelName}
+          />
+        </div>
       )}
       {activeTab === 'off_ramp' && (
-        <OffRampPanel
-          t={t}
-          user={user}
-          submitIncidentReport={submitIncidentReport}
-          reportingIncident={reportingIncident}
-          wipingState={wipingState}
-          handleWipePurge={handleWipePurge}
-        />
+        <div
+          role="tabpanel"
+          id="panel-off_ramp"
+          aria-labelledby="tab-off_ramp mobile-tab-off_ramp"
+          className="flex-grow flex flex-col"
+        >
+          <OffRampPanel
+            t={t}
+            user={user}
+            submitIncidentReport={submitIncidentReport}
+            reportingIncident={reportingIncident}
+            wipingState={wipingState}
+            handleWipePurge={handleWipePurge}
+          />
+        </div>
       )}
     </DashboardShell>
   );

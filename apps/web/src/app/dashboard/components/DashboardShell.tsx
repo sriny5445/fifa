@@ -153,9 +153,11 @@ export function DashboardShell({
             {(['mission_control', 'off_ramp'] as TabId[]).map((tab) => (
               <button
                 key={tab}
+                id={`tab-${tab}`}
                 onClick={() => changeTab(tab)}
                 role="tab"
                 aria-selected={activeTab === tab}
+                aria-controls={`panel-${tab}`}
                 className={`text-[10px] font-mono uppercase font-black px-2.5 py-1.5 rounded-lg transition outline-none focus:ring-1 focus:ring-[#137333] cursor-pointer ${
                   activeTab === tab 
                     ? 'bg-[#137333] text-white shadow-sm' 
@@ -236,15 +238,19 @@ export function DashboardShell({
         <div ref={mobileMenuRef} className="md:hidden fixed top-20 left-4 right-4 z-40 bg-background/95 backdrop-blur-xl border border-outline-border/20 rounded-2xl shadow-2xl p-5 space-y-4 animate-slideDown max-h-[80vh] overflow-y-auto">
           <div className="space-y-1.5">
             <h4 className="text-[9px] font-mono font-bold text-foreground/50 uppercase tracking-widest px-2">{t.mobileMenu.navigation}</h4>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="Mobile primary tabs">
               {(['mission_control', 'off_ramp'] as TabId[]).map((tab) => (
                 <button
                   key={tab}
+                  role="tab"
+                  aria-selected={activeTab === tab}
+                  aria-controls={`panel-${tab}`}
+                  id={`mobile-tab-${tab}`}
                   onClick={() => {
                     changeTab(tab);
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`text-xs font-mono font-bold px-3 py-2.5 rounded-xl border transition text-center cursor-pointer ${
+                  className={`text-xs font-mono font-bold px-3 py-2.5 rounded-xl border transition text-center cursor-pointer focus:ring-2 focus:ring-[#137333] outline-none ${
                     activeTab === tab 
                       ? 'bg-[#137333] border-[#137333] text-white shadow-sm' 
                       : 'bg-background/50 border-outline-border/15 text-foreground hover:bg-outline-border/10'
@@ -268,7 +274,7 @@ export function DashboardShell({
                   onClick={() => {
                     changeLanguage(l);
                   }}
-                  className={`flex-1 text-[11px] py-3.5 rounded-lg font-mono font-black uppercase transition cursor-pointer text-center min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                  className={`flex-1 text-[11px] py-3.5 rounded-lg font-mono font-black uppercase transition cursor-pointer text-center min-w-[44px] min-h-[44px] flex items-center justify-center focus:ring-2 focus:ring-[#137333] outline-none ${
                     lang === l 
                       ? 'bg-[#137333] text-white shadow-sm font-black' 
                       : 'text-foreground/75 hover:text-foreground hover:bg-outline-border/10'
