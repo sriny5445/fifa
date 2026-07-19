@@ -1,17 +1,19 @@
 import { describe, it, expect } from 'vitest';
 import { translations, Language } from './translations';
 
-function assertMatchingKeys(referenceObj: any, targetObj: any, path = ''): void {
-  const referenceKeys = Object.keys(referenceObj).sort();
-  const targetKeys = Object.keys(targetObj).sort();
+function assertMatchingKeys(referenceObj: unknown, targetObj: unknown, path = ''): void {
+  const ref = referenceObj as Record<string, unknown>;
+  const target = targetObj as Record<string, unknown>;
+  const referenceKeys = Object.keys(ref).sort();
+  const targetKeys = Object.keys(target).sort();
 
   // Assert keys match exactly
   expect(targetKeys, `Keys mismatch at path: "${path}"`).toEqual(referenceKeys);
 
   for (const key of referenceKeys) {
     const currentPath = path ? `${path}.${key}` : key;
-    const refVal = referenceObj[key];
-    const targetVal = targetObj[key];
+    const refVal = ref[key];
+    const targetVal = target[key];
 
     if (typeof refVal === 'object' && refVal !== null) {
       expect(typeof targetVal, `Type mismatch at path: "${currentPath}"`).toBe('object');

@@ -8,7 +8,7 @@ describe('Directives Server Action', () => {
   });
 
   it('should handle completely empty or null telemetry payload safely', async () => {
-    const directive = await processTelemetryAndGetDirective(null as any);
+    const directive = await processTelemetryAndGetDirective(null as unknown as StadiumTelemetry);
     expect(directive).toBeDefined();
     expect(directive.severity).toBe('LOW');
     expect(directive.telemetryId).toContain('Default-Stadium-Sector');
@@ -18,7 +18,7 @@ describe('Directives Server Action', () => {
     const malformedTelemetry = {
       stadiumId: 'MetLife-NJ',
       anomalyDetected: true,
-      coordinates: { x: 'invalid-x' as any, y: undefined as any }
+      coordinates: { x: 'invalid-x' as unknown as number, y: undefined as unknown as number }
     } as StadiumTelemetry;
 
     const directive = await processTelemetryAndGetDirective(malformedTelemetry);

@@ -75,22 +75,23 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 5: Strict Schema Validation Failure Fallback
   await t.test('Triggers safety fallback if AI response is missing required fields or has invalid types', async () => {
-    const mockValidator = (payload: any): boolean => {
+    const mockValidator = (payload: unknown): boolean => {
+      const p = payload as Record<string, unknown>;
       return !!(
-        payload &&
-        typeof payload === 'object' &&
-        ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(payload.severity) &&
-        typeof payload.headline === 'string' && payload.headline.trim().length > 0 &&
-        typeof payload.explanation === 'string' &&
-        Array.isArray(payload.recommendedRoute) &&
-        Array.isArray(payload.actionSteps) &&
-        typeof payload.targetGroup === 'string' &&
-        typeof payload.reasoning === 'string' &&
-        payload.announcements &&
-        typeof payload.announcements === 'object' &&
-        typeof payload.announcements.en === 'string' && payload.announcements.en.trim().length > 0 &&
-        typeof payload.announcements.es === 'string' && payload.announcements.es.trim().length > 0 &&
-        typeof payload.announcements.pt === 'string' && payload.announcements.pt.trim().length > 0
+        p &&
+        typeof p === 'object' &&
+        ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(p.severity as string) &&
+        typeof p.headline === 'string' && (p.headline as string).trim().length > 0 &&
+        typeof p.explanation === 'string' &&
+        Array.isArray(p.recommendedRoute) &&
+        Array.isArray(p.actionSteps) &&
+        typeof p.targetGroup === 'string' &&
+        typeof p.reasoning === 'string' &&
+        p.announcements &&
+        typeof p.announcements === 'object' &&
+        typeof (p.announcements as Record<string, string>).en === 'string' && ((p.announcements as Record<string, string>).en as string).trim().length > 0 &&
+        typeof (p.announcements as Record<string, string>).es === 'string' && ((p.announcements as Record<string, string>).es as string).trim().length > 0 &&
+        typeof (p.announcements as Record<string, string>).pt === 'string' && ((p.announcements as Record<string, string>).pt as string).trim().length > 0
       );
     };
 
@@ -134,9 +135,10 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 6: Audit Operator Identity Fallback Resolution
   await t.test('Operator Identity Helper resolves uid prefix or name properly', async () => {
-    const getOperatorIdentity = (user: any) => {
+    const getOperatorIdentity = (user: unknown) => {
       if (!user) return 'Anonymous_Guest';
-      return user.email || user.displayName || `Operator_${user.uid.substring(0, 5)}`;
+      const u = user as Record<string, unknown>;
+      return (u.email as string) || (u.displayName as string) || `Operator_${(u.uid as string).substring(0, 5)}`;
     };
 
     const googleUser = { email: 'staff@fifa.org', displayName: 'Vol Coordinator', uid: 'google1234567' };
@@ -165,7 +167,7 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 8: Multilingual Translation Fallback Routing
   await t.test('Multilingual Translator routes or falls back correctly', () => {
-    const getAnnouncementTranslation = (announcements: any, lang: string): string => {
+    const getAnnouncementTranslation = (announcements: Record<string, string> | null | undefined, lang: string): string => {
       const fallback = announcements?.en || 'Routine Operations';
       return announcements?.[lang] || fallback;
     };
@@ -242,10 +244,11 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 12: Coordinates validation
   await t.test('Coordinate bounds check helper validates inputs correctly', () => {
-    const isValidCoords = (coords: any): boolean => {
+    const isValidCoords = (coords: unknown): boolean => {
       if (!coords || typeof coords !== 'object') return false;
-      const x = coords.x;
-      const y = coords.y;
+      const c = coords as Record<string, unknown>;
+      const x = c.x;
+      const y = c.y;
       return typeof x === 'number' && !isNaN(x) && x >= 0 && x <= 1 &&
              typeof y === 'number' && !isNaN(y) && y >= 0 && y <= 1;
     };
@@ -262,16 +265,16 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
     const flowStates: string[] = [];
     
     // Step 1: Telemetry Intake
-    const intake = (raw: any) => {
+    const intake = (raw: Record<string, unknown>) => {
       flowStates.push('INTAKE_RECEIVED');
       return {
-        density: Math.max(0, Math.min(1, raw.density ?? 0)),
+        density: Math.max(0, Math.min(1, (raw.density as number) ?? 0)),
         isAnomaly: !!raw.anomaly
       };
     };
     
     // Step 2: AI Directive Generation Simulation
-    const processDirective = (data: any) => {
+    const processDirective = (data: { density: number; isAnomaly: boolean }) => {
       flowStates.push('DIRECTIVE_GENERATED');
       return {
         severity: data.density > 0.8 || data.isAnomaly ? 'CRITICAL' : 'LOW',
@@ -280,7 +283,7 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
     };
     
     // Step 3: Acknowledgment Awaiting & Commit
-    const ack = (directive: any, verified: boolean) => {
+    const ack = (directive: { needAck: boolean }, verified: boolean) => {
       if (directive.needAck && verified) {
         flowStates.push('ACKNOWLEDGED');
       } else {
@@ -298,17 +301,17 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 14: Non-Numeric and Empty Coordinates Default Fallback Validation
   await t.test('Non-numeric and empty coordinates default safely to 0.5 without crashing generator', async () => {
-    const rawTelemetry: any = {
+    const rawTelemetry = {
       stadiumId: 'AT-T-Dallas',
       timestamp: new Date().toISOString(),
       crowdDensity: 0.95,
       noiseLevelDb: 90,
       spatialCongestionRatio: 0.9,
       anomalyDetected: true,
-      coordinates: { x: NaN, y: undefined } // invalid coords
-    };
+      coordinates: { x: NaN, y: undefined as unknown as number }
+    } as unknown as StadiumTelemetry;
 
-    const directive = await generateDirective(rawTelemetry as any, 'AIzaSyPlaceholderKeyForMocking');
+    const directive = await generateDirective(rawTelemetry, 'AIzaSyPlaceholderKeyForMocking');
     assert.ok(directive.explanation.includes('X:0.50') || directive.explanation.includes('Y:0.50') || directive.explanation.includes('Stadium'));
   });
 
@@ -317,7 +320,7 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
     let localAcknowledged = false;
     let consoleErrorTriggered = false;
 
-    const mockAddDoc = async (_collectionName: string, _data: any) => {
+    const mockAddDoc = async (_collectionName: string, _data: unknown) => {
       // Simulate database write failure (e.g. offline status or rule block)
       throw new Error('Firestore Write Blocked (Offline)');
     };
@@ -343,8 +346,8 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 16: Centralized Null and Undefined Telemetry Parameter Safety
   await t.test('Handles null or undefined telemetry without throwing errors', async () => {
-    const directive1 = await generateDirective(null as any, 'AIzaSyPlaceholderKeyForMocking');
-    const directive2 = await generateDirective(undefined as any, 'AIzaSyPlaceholderKeyForMocking');
+    const directive1 = await generateDirective(null as unknown as StadiumTelemetry, 'AIzaSyPlaceholderKeyForMocking');
+    const directive2 = await generateDirective(undefined as unknown as StadiumTelemetry, 'AIzaSyPlaceholderKeyForMocking');
     
     assert.strictEqual(directive1.severity, 'LOW');
     assert.strictEqual(directive2.severity, 'LOW');
@@ -354,15 +357,15 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 17: Malformed and Out-of-Bounds Numeric Fields Clamping
   await t.test('Clamps and replaces malformed numeric fields (NaN, Infinity, Strings)', async () => {
-    const rawTelemetry: any = {
+    const rawTelemetry = {
       stadiumId: 'AT-T-Dallas',
       timestamp: new Date().toISOString(),
-      crowdDensity: 'huge' as any,            // malformed type -> defaults to 0.0
-      noiseLevelDb: Infinity as any,         // extreme overflow -> clamps to 150.0
-      spatialCongestionRatio: -100.0 as any, // extreme underflow -> clamps to 0.0
+      crowdDensity: 'huge' as unknown as number,            // malformed type -> defaults to 0.0
+      noiseLevelDb: Infinity as unknown as number,         // extreme overflow -> clamps to 150.0
+      spatialCongestionRatio: -100.0 as unknown as number, // extreme underflow -> clamps to 0.0
       anomalyDetected: false,
       coordinates: { x: 0.5, y: 0.5 }
-    };
+    } as unknown as StadiumTelemetry;
 
     const directive = await generateDirective(rawTelemetry, 'AIzaSyPlaceholderKeyForMocking');
     
@@ -373,7 +376,7 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 18: Completely Missing Coordinates Parameter Falls Back to 0.5
   await t.test('Completely missing coordinates parameter defaults safely to 0.5', async () => {
-    const rawTelemetry: any = {
+    const rawTelemetry = {
       stadiumId: 'AT-T-Dallas',
       timestamp: new Date().toISOString(),
       crowdDensity: 0.5,
@@ -382,7 +385,7 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
       anomalyDetected: false,
       anomalyDescription: 'Routine Check'
       // coordinates is entirely omitted
-    };
+    } as unknown as StadiumTelemetry;
 
     const directive = await generateDirective(rawTelemetry, 'AIzaSyPlaceholderKeyForMocking');
     
@@ -392,24 +395,25 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 19: Strict Schema Validation Rejects Empty reasoning/headline and Invalid Severity
   await t.test('AI Output Validation rejects empty reasoning/headline or invalid severity levels', () => {
-    const schemaValidator = (payload: any): boolean => {
+    const schemaValidator = (payload: unknown): boolean => {
+      const p = payload as Record<string, unknown>;
       return !!(
-        payload &&
-        typeof payload === 'object' &&
-        ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(payload.severity) &&
-        typeof payload.headline === 'string' && payload.headline.trim().length > 0 &&
-        typeof payload.explanation === 'string' && payload.explanation.trim().length > 0 &&
-        Array.isArray(payload.recommendedRoute) && payload.recommendedRoute.length > 0 &&
-        payload.recommendedRoute.every((r: any) => typeof r === 'string' && r.trim().length > 0) &&
-        Array.isArray(payload.actionSteps) && payload.actionSteps.length > 0 &&
-        payload.actionSteps.every((a: any) => typeof a === 'string' && a.trim().length > 0) &&
-        typeof payload.targetGroup === 'string' && payload.targetGroup.trim().length > 0 &&
-        typeof payload.reasoning === 'string' && payload.reasoning.trim().length > 0 &&
-        payload.announcements &&
-        typeof payload.announcements === 'object' &&
-        typeof payload.announcements.en === 'string' && payload.announcements.en.trim().length > 0 &&
-        typeof payload.announcements.es === 'string' && payload.announcements.es.trim().length > 0 &&
-        typeof payload.announcements.pt === 'string' && payload.announcements.pt.trim().length > 0
+        p &&
+        typeof p === 'object' &&
+        ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(p.severity as string) &&
+        typeof p.headline === 'string' && (p.headline as string).trim().length > 0 &&
+        typeof p.explanation === 'string' && (p.explanation as string).trim().length > 0 &&
+        Array.isArray(p.recommendedRoute) && p.recommendedRoute.length > 0 &&
+        p.recommendedRoute.every((r: unknown) => typeof r === 'string' && (r as string).trim().length > 0) &&
+        Array.isArray(p.actionSteps) && p.actionSteps.length > 0 &&
+        p.actionSteps.every((a: unknown) => typeof a === 'string' && (a as string).trim().length > 0) &&
+        typeof p.targetGroup === 'string' && (p.targetGroup as string).trim().length > 0 &&
+        typeof p.reasoning === 'string' && (p.reasoning as string).trim().length > 0 &&
+        p.announcements &&
+        typeof p.announcements === 'object' &&
+        typeof (p.announcements as Record<string, string>).en === 'string' && ((p.announcements as Record<string, string>).en as string).trim().length > 0 &&
+        typeof (p.announcements as Record<string, string>).es === 'string' && ((p.announcements as Record<string, string>).es as string).trim().length > 0 &&
+        typeof (p.announcements as Record<string, string>).pt === 'string' && ((p.announcements as Record<string, string>).pt as string).trim().length > 0
       );
     };
 
@@ -464,7 +468,7 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 22: generateMockDirective handles completely undefined input
   await t.test('generateMockDirective produces valid LOW directive from undefined input', () => {
-    const directive = generateMockDirective(undefined as any);
+    const directive = generateMockDirective(undefined as unknown as StadiumTelemetry);
     
     assert.strictEqual(directive.severity, 'LOW');
     assert.ok(directive.headline.length > 0);
@@ -521,7 +525,7 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 25: generateDirective with malformed telemetry timestamp handles safely
   await t.test('generateDirective defaults timestamp safely if input is invalid or missing', async () => {
-    const rawTelemetry: any = {
+    const rawTelemetry = {
       stadiumId: 'AT-T-Dallas',
       timestamp: 'not-a-date',
       crowdDensity: 0.5,
@@ -529,7 +533,7 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
       spatialCongestionRatio: 0.4,
       anomalyDetected: false,
       coordinates: { x: 0.5, y: 0.5 }
-    };
+    } as unknown as StadiumTelemetry;
 
     const directive = await generateDirective(rawTelemetry, 'AIzaSyPlaceholderKeyForMocking');
     assert.ok(directive.timestamp);
@@ -538,7 +542,7 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 26: Firestore write resilience simulation
   await t.test('Dashboard action resilient to Firestore write failures', async () => {
-    const mockAddDoc = async (_col: any, _data: any) => {
+    const mockAddDoc = async (_col: unknown, _data: unknown) => {
       throw new Error('Firestore connection timeout (offline simulator)');
     };
 
@@ -573,13 +577,14 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 28: Empty/null/undefined announcements object fields trigger fallback
   await t.test('Schema validation rejects directives missing key language announcements', () => {
-    const schemaValidator = (payload: any): boolean => {
+    const schemaValidator = (payload: unknown): boolean => {
+      const p = payload as Record<string, unknown>;
       return !!(
-        payload &&
-        payload.announcements &&
-        typeof payload.announcements.en === 'string' &&
-        typeof payload.announcements.es === 'string' &&
-        typeof payload.announcements.pt === 'string'
+        p &&
+        p.announcements &&
+        typeof (p.announcements as Record<string, unknown>).en === 'string' &&
+        typeof (p.announcements as Record<string, unknown>).es === 'string' &&
+        typeof (p.announcements as Record<string, unknown>).pt === 'string'
       );
     };
 
@@ -611,12 +616,13 @@ test('Stadium Telemetry Generator Test Suite', async (t) => {
 
   // Test case 30: Centralized getOperatorIdentity handles anonymous stewards
   await t.test('getOperatorIdentity prefixes anonymous users with DEMO_Steward_', () => {
-    const getOperatorIdentity = (user: any) => {
+    const getOperatorIdentity = (user: unknown) => {
       if (!user) return 'Guest_User';
-      if (user.isAnonymous) {
-        return `DEMO_Steward_${user.uid.substring(0, 5)}`;
+      const u = user as Record<string, unknown>;
+      if (u.isAnonymous) {
+        return `DEMO_Steward_${(u.uid as string).substring(0, 5)}`;
       }
-      return user.email || user.displayName || `Steward_${user.uid.substring(0, 5)}`;
+      return (u.email as string) || (u.displayName as string) || `Steward_${(u.uid as string).substring(0, 5)}`;
     };
 
     const anonUser = { isAnonymous: true, uid: 'anonUser123456789' };

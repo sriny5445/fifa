@@ -115,7 +115,7 @@ export async function generateDirective(
 
     const textNormalize = resNormalize.text;
     if (!textNormalize) throw new Error('Stage 1 (Normalize) returned empty output');
-    const normalizedData = JSON.parse(textNormalize);
+    const normalizedData = JSON.parse(textNormalize) as StadiumTelemetry;
 
     // Validate Stage 1 Normalized Data
     if (!normalizedData || typeof normalizedData !== 'object' || typeof normalizedData.stadiumId !== 'string') {
@@ -154,7 +154,7 @@ export async function generateDirective(
 
     const textClassify = resClassify.text;
     if (!textClassify) throw new Error('Stage 2 (Classify) returned empty output');
-    const classification = JSON.parse(textClassify);
+    const classification = JSON.parse(textClassify) as { severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'; reason: string };
 
     // Validate Stage 2 Classification
     if (!classification || !['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(classification.severity)) {
@@ -200,7 +200,14 @@ export async function generateDirective(
 
     const textDirective = resDirective.text;
     if (!textDirective) throw new Error('Stage 3 (Directive) returned empty output');
-    const directiveData = JSON.parse(textDirective);
+    const directiveData = JSON.parse(textDirective) as {
+      headline: string;
+      explanation: string;
+      recommendedRoute: string[];
+      actionSteps: string[];
+      targetGroup: string;
+      reasoning: string;
+    };
 
     // Validate Stage 3 Directive
     if (
@@ -252,7 +259,13 @@ export async function generateDirective(
 
     const textBroadcast = resBroadcast.text;
     if (!textBroadcast) throw new Error('Stage 4 (Broadcast) returned empty output');
-    const broadcastData = JSON.parse(textBroadcast);
+    const broadcastData = JSON.parse(textBroadcast) as {
+      announcements: {
+        en: string;
+        es: string;
+        pt: string;
+      };
+    };
 
     // Validate Stage 4 Announcements
     if (
