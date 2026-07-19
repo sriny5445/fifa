@@ -86,11 +86,6 @@ export default function Dashboard() {
   const [reportingIncident, setReportingIncident] = useState(false);
   const [wipingState, setWipingState] = useState(false);
 
-  // Sync announcement language when interface language changes
-  useEffect(() => {
-    const next: 'en' | 'es' | 'pt' = (lang === 'es' || lang === 'pt') ? lang : 'en';
-    setSelectedLanguage(next);
-  }, [lang]);
 
   // Auth Redirect Gate
   useEffect(() => {
@@ -145,6 +140,8 @@ export default function Dashboard() {
   const changeLanguage = (newLang: Language) => {
     setLang(newLang);
     saveLanguage(newLang);
+    const next: 'en' | 'es' | 'pt' = (newLang === 'es' || newLang === 'pt') ? newLang : 'en';
+    setSelectedLanguage(next);
   };
 
   const toggleLayoutMode = () => {
@@ -320,7 +317,6 @@ export default function Dashboard() {
       lang={lang}
       changeLanguage={changeLanguage}
       user={user}
-      selectedZone={selectedZone}
       maintenanceMode={isDemo}
     >
       {activeTab === 'mission_control' && (

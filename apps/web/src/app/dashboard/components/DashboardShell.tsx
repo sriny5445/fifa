@@ -2,14 +2,11 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   X, 
   Menu, 
-  QrCode, 
-  Signal, 
   User, 
   LogOut, 
   CompassIcon, 
   SlidersHorizontal, 
   Sliders, 
-  Activity, 
   ShieldCheck 
 } from 'lucide-react';
 import { TranslationSet, Language } from '@/lib/translations';
@@ -86,7 +83,6 @@ export interface DashboardShellProps {
   lang: Language;
   changeLanguage: (lang: Language) => void;
   user: FirebaseUser | null;
-  selectedZone: string;
   maintenanceMode: boolean;
   children: React.ReactNode;
 }
@@ -100,7 +96,6 @@ export function DashboardShell({
   lang,
   changeLanguage,
   user,
-  selectedZone,
   maintenanceMode,
   children
 }: DashboardShellProps) {

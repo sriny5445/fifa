@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI, Type, GenerateContentConfig, Schema } from '@google/genai';
 import { StadiumTelemetry, OperationalDirective } from '../types/index.js';
 
 export async function generateDirective(
@@ -88,7 +88,6 @@ export async function generateDirective(
       model: 'gemini-3.1-flash-lite',
       contents: promptNormalize,
       config: {
-        //@ts-ignore
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
@@ -110,8 +109,8 @@ export async function generateDirective(
             timestamp: { type: Type.STRING }
           },
           required: ['stadiumId', 'crowdDensity', 'noiseLevelDb', 'spatialCongestionRatio', 'anomalyDetected', 'anomalyDescription', 'coordinates', 'timestamp']
-        }
-      }
+        } as Schema
+      } as GenerateContentConfig
     });
 
     const textNormalize = resNormalize.text;
@@ -141,7 +140,6 @@ export async function generateDirective(
       model: 'gemini-3.1-flash-lite',
       contents: promptClassify,
       config: {
-        //@ts-ignore
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
@@ -150,8 +148,8 @@ export async function generateDirective(
             reason: { type: Type.STRING }
           },
           required: ['severity', 'reason']
-        }
-      }
+        } as Schema
+      } as GenerateContentConfig
     });
 
     const textClassify = resClassify.text;
@@ -184,7 +182,6 @@ export async function generateDirective(
       model: 'gemini-3.1-flash-lite',
       contents: promptDirective,
       config: {
-        //@ts-ignore
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
@@ -197,8 +194,8 @@ export async function generateDirective(
             reasoning: { type: Type.STRING }
           },
           required: ['headline', 'explanation', 'recommendedRoute', 'actionSteps', 'targetGroup', 'reasoning']
-        }
-      }
+        } as Schema
+      } as GenerateContentConfig
     });
 
     const textDirective = resDirective.text;
@@ -234,7 +231,6 @@ export async function generateDirective(
       model: 'gemini-3.1-flash-lite',
       contents: promptBroadcast,
       config: {
-        //@ts-ignore
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
@@ -250,8 +246,8 @@ export async function generateDirective(
             }
           },
           required: ['announcements']
-        }
-      }
+        } as Schema
+      } as GenerateContentConfig
     });
 
     const textBroadcast = resBroadcast.text;
