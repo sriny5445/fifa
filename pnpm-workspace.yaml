@@ -5,3 +5,8 @@ allowBuilds:
   protobufjs: true
   sharp: true
   unrs-resolver: true
+overrides:
+  undici: "^6.27.0"
+  uuid: "^11.1.1"
+  vite: "^6.4.3"
+  esbuild: "^0.25.0"
