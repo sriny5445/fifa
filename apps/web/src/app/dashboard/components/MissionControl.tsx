@@ -75,6 +75,11 @@ export function MissionControl({
   anomalyThresholdCongestion,
   activeModelName
 }: MissionControlProps) {
+  const rawScript = activeDirective?.announcements[selectedLanguage] || '';
+  const tailoredScript = activeDirective
+    ? rawScript.replace(/(Gate|Puerta|Port[ãa]o)\s+[A-D0-9]/gi, selectedZone)
+    : 'No script loaded.';
+
   return (
     <>
       {!shiftActive ? (
@@ -373,12 +378,12 @@ export function MissionControl({
                   <div className="space-y-4">
                     <div className="bg-[#ffffff] p-4 rounded-xl border border-outline-border/20 relative">
                       <p className="text-xs font-mono font-semibold text-foreground/80 leading-relaxed pr-8">
-                        {activeDirective.announcements[selectedLanguage] || 'No script loaded.'}
+                        {tailoredScript}
                       </p>
                       <button
                         onClick={() => {
                           try {
-                            navigator.clipboard.writeText(activeDirective.announcements[selectedLanguage]);
+                            navigator.clipboard.writeText(tailoredScript);
                             alert(t.alerts.copiedScript);
                           } catch {
                             // Clipboard API unavailable — fail silently
